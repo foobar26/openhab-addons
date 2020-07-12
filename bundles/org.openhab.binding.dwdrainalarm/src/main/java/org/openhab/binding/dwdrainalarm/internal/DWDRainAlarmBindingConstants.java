@@ -27,8 +27,8 @@ public class DWDRainAlarmBindingConstants {
     private static final String BINDING_ID = "dwdrainalarm";
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
+    public static final ThingTypeUID THING_TYPE_RAINALARM = new ThingTypeUID(BINDING_ID, "rainalarm");
 
     // List of all Channel ids
-    public static final String CHANNEL_1 = "channel1";
+    public static final String EVENT_CHANNEL_ID_CURRENT = "current";
 }

@@ -5,28 +5,27 @@
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<!-- Sample Thing Type -->
-	<thing-type id="sample">
+	<thing-type id="rainalarm">
 		<label>DWDRainAlarm Binding Thing</label>
-		<description>Sample thing for DWDRainAlarm Binding</description>
+		<description>Provides rain forcasts for given location</description>
 
 		<channels>
-			<channel id="channel1" typeId="sample-channel" />
+			<channel id="current" typeId="current" />
 		</channels>
 
-		<config-description>
-			<parameter name="config1" type="text" required="true">
-				<label>Sample Parameter</label>
-				<description>This is a sample text configuration parameter</description>
-			</parameter>
-		</config-description>
+		<representation-property>geolocation</representation-property>
+
+		<config-description-ref uri="thing-type:dwdrainalarm:config"/>
 
 	</thing-type>
 
 	<!-- Sample Channel Type -->
-	<channel-type id="sample-channel">
-		<item-type>dwdrainalarmItem</item-type>
-		<label>DWDRainAlarm Binding Channel</label>
-		<description>Sample channel for DWDRainAlarm Binding</description>
+	<channel-type id="current">
+		<item-type>Number:Length</item-type>
+		<label>Current rain volume</label>
+		<description>Value for current rain volume</description>
+		<category>Rain</category>
+		<state readOnly="true" pattern="%.2f %unit%"/>
 	</channel-type>
 
 </thing:thing-descriptions>

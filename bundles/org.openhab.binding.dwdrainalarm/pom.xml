@@ -13,4 +13,11 @@
 
   <name>openHAB Add-ons :: Bundles :: DWDRainAlarm Binding</name>
 
+  <!-- parses the DWD RADOLAN / RADVOR radar composite format - Java port of https://gitlab.cs.fau.de/since/radolan http://www.bitplan.com/Radolan -->
+  <dependency>
+    <groupId>com.bitplan.radolan</groupId>
+    <artifactId>com.bitplan.radolan</artifactId>
+    <version>0.0.2</version>
+  </dependency>
+  
 </project>
