@@ -67,18 +67,15 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (EVENT_CHANNEL_ID_CURRENT.equals(channelUID.getId())) {
-            if (command instanceof RefreshType) {
-                // TODO: handle data refresh
-            }
-
-            // TODO: handle command
-
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
+        if (command instanceof RefreshType) {
+            scheduler.schedule(this::updateThings, INITIAL_DELAY_IN_SECONDS, TimeUnit.SECONDS);
+        } else {
+            logger.debug("The DWDRainAlarm binding is a read-only binding and cannot handle command '{}'.", command);
         }
+    }
+
+    private void updateThings() {
+        this.updateThing();
     }
 
     @Override
@@ -118,7 +115,7 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             ScheduledFuture<?> localRefreshJob = refreshJob;
             if (localRefreshJob == null || localRefreshJob.isCancelled()) {
                 logger.debug("Start refresh job at interval {} seconds.", config.interval);
-                refreshJob = scheduler.scheduleWithFixedDelay(this::updateThing, INITIAL_DELAY_IN_SECONDS,
+                refreshJob = scheduler.scheduleWithFixedDelay(this::updateThings, INITIAL_DELAY_IN_SECONDS,
                         config.interval, TimeUnit.SECONDS);
             }
 
