@@ -20,6 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
+import org.eclipse.smarthome.core.library.types.DateTimeType;
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.scheduler.CronScheduler;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -28,10 +31,13 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
+import org.eclipse.smarthome.core.types.State;
+import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.dwdrainalarm.internal.radolan.RadolanReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.measure.Unit;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -47,8 +53,9 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(DWDRainAlarmHandler.class);
     private static final long INITIAL_DELAY_IN_SECONDS = 15;
 
-    private @Nullable
-    DWDRainAlarmConfiguration config;
+    private @Nullable DWDRainAlarmConfiguration config;
+
+    private boolean inRefresh = false;
 
     /** Scheduler to schedule jobs */
     private final CronScheduler cronScheduler;
@@ -75,12 +82,14 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
     }
 
     private void updateThings() {
-        this.updateThing();
+        logger.trace("Updating rain radar!");
+
+        this.updateData();
     }
 
     @Override
     public void initialize() {
-        // logger.debug("Start initializing!");
+        logger.debug("Start initializing rain radar!");
         String thingUid = getThing().getUID().toString();
         config = getConfigAs(DWDRainAlarmConfiguration.class);
         config.setThingUid(thingUid);
@@ -108,10 +117,6 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             logger.debug("{}", config);
             updateStatus(ONLINE);
 
-            Double latitude = config.latitude;
-            Double longitude = config.longitude;
-            radolanReader.initializePosition(latitude, longitude);
-
             ScheduledFuture<?> localRefreshJob = refreshJob;
             if (localRefreshJob == null || localRefreshJob.isCancelled()) {
                 logger.debug("Start refresh job at interval {} seconds.", config.interval);
@@ -119,6 +124,7 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
                         config.interval, TimeUnit.SECONDS);
             }
 
+            logger.info("Rain radar for location=" + config.geolocation + " initialized !");
         } else {
             updateStatus(OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
         }
@@ -145,12 +151,49 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
         }
     }
 
-    private void updateThing() {
-        this.updateData();
+    private void updateData() {
+        if (inRefresh) {
+            logger.trace("Already refreshing. Ignoring refresh request.");
+            return;
+        }
+
+        ThingStatus status = getThing().getStatus();
+        if (status != ThingStatus.ONLINE && status != ThingStatus.UNKNOWN) {
+            logger.debug("Unable to refresh. Thing status is {}", status);
+            return;
+        }
+
+        inRefresh = true;
+
+        if (radolanReader.getUrl() == null) {
+            radolanReader = new RadolanReader();
+            radolanReader.setUrlForProduct("https://opendata.dwd.de/weather/radar/composit/wx/raa01-wx_10000-latest-dwd---bin", false);
+            Double latitude = config.latitude;
+            Double longitude = config.longitude;
+            radolanReader.initializePosition(latitude, longitude);
+        } else {
+            radolanReader.refresh();
+        }
+        Float currentValue = radolanReader.updateCurrent();
+        Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(10);
+
+        if (status == ThingStatus.UNKNOWN) {
+            updateStatus(ThingStatus.ONLINE);
+        }
+
+        updateState(getChannelUuid(EVENT_CHANNEL_ID_CURRENT), new DecimalType(currentValue));
+        updateState(getChannelUuid(EVENT_CHANNEL_ID_MAXINRADIUS), new DecimalType(maxValueWithinRadius));
+
+        inRefresh = false;
+        logger.debug("Rain radar updated.");
     }
 
-    private void updateData() {
-        radolanReader.updateCurrent();
+    private ChannelUID getChannelUuid(String typeId) {
+        return new ChannelUID(getThing().getUID(), typeId);
+    }
+
+    protected State getQuantityTypeState(@Nullable Number value, Unit<?> unit) {
+        return (value == null) ? UnDefType.UNDEF : new QuantityType<>(value, unit);
     }
 
 }

@@ -4,13 +4,13 @@
                           xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
                           xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
-    <!-- Sample Thing Type -->
     <thing-type id="rainalarm">
         <label>DWDRainAlarm Binding Thing</label>
         <description>Provides rain forcasts for given location</description>
 
         <channels>
             <channel id="current" typeId="current"/>
+            <channel id="maxInRadius" typeId="maxInRadius"/>
         </channels>
 
         <representation-property>geolocation</representation-property>
@@ -19,12 +19,17 @@
 
     </thing-type>
 
-    <!-- Sample Channel Type -->
     <channel-type id="current">
         <item-type>Number:Length</item-type>
         <label>Current rain volume</label>
         <description>Value for current rain volume</description>
-        <category>Rain</category>
+        <state readOnly="true" pattern="%.2f %unit%"/>
+    </channel-type>
+
+    <channel-type id="maxInRadius">
+        <item-type>Number:Length</item-type>
+        <label>Current max rain volume in radius around location</label>
+        <description>Value for current rain volume within radius around location</description>
         <state readOnly="true" pattern="%.2f %unit%"/>
     </channel-type>
 

@@ -78,4 +78,8 @@ public class RadolanReader {
         }
         return returnValue;
     }
+
+    public String getUrl() {
+        return this.URL;
+    }
 }

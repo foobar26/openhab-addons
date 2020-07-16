@@ -16,6 +16,11 @@
             <description>Refresh interval for positional data calculation in seconds.</description>
             <default>300</default>
         </parameter>
+        <parameter name="radius" type="integer" min="0" max="10000">
+            <label>Radius</label>
+            <description>radius around location to gather rain values</description>
+            <default>10</default>
+        </parameter>
     </config-description>
 
 </config-description:config-descriptions>
