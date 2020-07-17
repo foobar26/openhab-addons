@@ -20,7 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.scheduler.CronScheduler;
@@ -112,6 +111,10 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             logger.error("DWDRainAlarm parameter interval must be in the range of 1-86400, disabling thing '{}'", thingUid);
             validConfig = false;
         }
+        if (config.predictionTime < 5 || config.predictionTime > 120) {
+            logger.error("DWDRainAlarm parameter interval must be in the range of 5-120 (in 5 min steps), disabling thing '{}'", thingUid);
+            validConfig = false;
+        }
 
         if (validConfig) {
             logger.debug("{}", config);
@@ -165,17 +168,18 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
 
         inRefresh = true;
 
-        if (radolanReader.getUrl() == null) {
+        if (radolanReader.getLatitude() == 0) {
             radolanReader = new RadolanReader();
-            radolanReader.setUrlForProduct("https://opendata.dwd.de/weather/radar/composit/wx/raa01-wx_10000-latest-dwd---bin", false);
+            radolanReader.setPredictionTime(config.predictionTime);
             Double latitude = config.latitude;
             Double longitude = config.longitude;
-            radolanReader.initializePosition(latitude, longitude);
+            radolanReader.setPosition(latitude, longitude);
         } else {
             radolanReader.refresh();
         }
-        Float currentValue = radolanReader.updateCurrent();
-        Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(10);
+        Float currentValue = radolanReader.getCurrent();
+        Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(config.radius);
+        Float predictionValue = radolanReader.getPrediction();
 
         if (status == ThingStatus.UNKNOWN) {
             updateStatus(ThingStatus.ONLINE);
@@ -183,6 +187,7 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
 
         updateState(getChannelUuid(EVENT_CHANNEL_ID_CURRENT), new DecimalType(currentValue));
         updateState(getChannelUuid(EVENT_CHANNEL_ID_MAXINRADIUS), new DecimalType(maxValueWithinRadius));
+        updateState(getChannelUuid(EVENT_CHANNEL_ID_PREDICTION), new DecimalType(predictionValue));
 
         inRefresh = false;
         logger.debug("Rain radar updated.");

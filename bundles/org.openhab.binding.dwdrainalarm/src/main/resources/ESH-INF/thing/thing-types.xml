@@ -21,15 +21,22 @@
 
     <channel-type id="current">
         <item-type>Number:Length</item-type>
-        <label>Current rain volume</label>
-        <description>Value for current rain volume</description>
+        <label>Current radar value</label>
+        <description>Value for current radar value at location</description>
         <state readOnly="true" pattern="%.2f %unit%"/>
     </channel-type>
 
     <channel-type id="maxInRadius">
         <item-type>Number:Length</item-type>
-        <label>Current max rain volume in radius around location</label>
-        <description>Value for current rain volume within radius around location</description>
+        <label>Max radar value in radius around location</label>
+        <description>Value for Max radar value within radius around location</description>
+        <state readOnly="true" pattern="%.2f %unit%"/>
+    </channel-type>
+
+    <channel-type id="prediction">
+        <item-type>Number:Length</item-type>
+        <label>Predicted radar value in radius at location</label>
+        <description>Value for predicted radar value at location</description>
         <state readOnly="true" pattern="%.2f %unit%"/>
     </channel-type>
 

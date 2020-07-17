@@ -32,4 +32,6 @@ public class DWDRainAlarmBindingConstants {
     // List of all Channel ids
     public static final String EVENT_CHANNEL_ID_CURRENT = "current";
     public static final String EVENT_CHANNEL_ID_MAXINRADIUS = "maxInRadius";
+    public static final String EVENT_CHANNEL_ID_PREDICTION = "prediction";
+
 }

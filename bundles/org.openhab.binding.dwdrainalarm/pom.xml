@@ -29,6 +29,24 @@ Import-Package: org.apache.commons.lang.*, org.apache.commons.io.*, !com.sun.*, 
         ]]></bnd>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <tasks>
+                        <copy
+                                file="target/org.openhab.binding.dwdrainalarm-${project.version}.jar"
+                                tofile="release/org.openhab.binding.dwdrainalarm-${project.version}.jar" />
+                    </tasks>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -127,6 +145,11 @@ Import-Package: org.apache.commons.lang.*, org.apache.commons.io.*, !com.sun.*, 
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.20</version>
         </dependency>
     </dependencies>
 

@@ -21,6 +21,11 @@
             <description>radius around location to gather rain values</description>
             <default>10</default>
         </parameter>
+        <parameter name="prediction-time" type="integer" min="5" max="120">
+            <label>Prediction Time</label>
+            <description>Time from now in minutes to predict rain values</description>
+            <default>10</default>
+        </parameter>
     </config-description>
 
 </config-description:config-descriptions>

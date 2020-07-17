@@ -16,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link DWDRainAlarmConfiguration} class contains fields mapping thing configuration parameters.
@@ -23,10 +25,14 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Frank Egger - Initial contribution
  */
 public class DWDRainAlarmConfiguration {
+    private final Logger logger = LoggerFactory.getLogger(DWDRainAlarmConfiguration.class);
+
     public @Nullable String geolocation;
     public @Nullable Double latitude;
     public @Nullable Double longitude;
+    public int radius = 10;
     public int interval = 300;
+    public int predictionTime = 10;
     private @Nullable String thingUid;
 
     /**
@@ -34,16 +40,15 @@ public class DWDRainAlarmConfiguration {
      */
     public void parseGeoLocation() {
         String[] geoParts = StringUtils.split(geolocation, ",");
-        if (geoParts.length == 2) {
-            latitude = toDouble(geoParts[0]);
-            longitude = toDouble(geoParts[1]);
-        }
+        latitude = toDouble(geoParts[0]);
+        longitude = toDouble(geoParts[1]);
     }
 
     private @Nullable Double toDouble(String value) {
         try {
             return Double.parseDouble(StringUtils.trimToNull(value));
         } catch (NumberFormatException ex) {
+            logger.error("Failed to parse geolocation", ex);
             return null;
         }
     }
