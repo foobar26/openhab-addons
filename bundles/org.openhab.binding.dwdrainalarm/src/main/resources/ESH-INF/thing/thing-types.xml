@@ -11,6 +11,7 @@
         <channels>
             <channel id="current" typeId="current"/>
             <channel id="maxInRadius" typeId="maxInRadius"/>
+            <channel id="prediction" typeId="prediction" />
         </channels>
 
         <representation-property>geolocation</representation-property>

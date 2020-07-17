@@ -25,7 +25,7 @@
                 <artifactId>bnd-maven-plugin</artifactId>
                 <configuration>
                     <bnd><![CDATA[
-Import-Package: org.apache.commons.lang.*, org.apache.commons.io.*, !com.sun.*, !sun.*, !com.google.common.*, !eu.hansolo.*, !org.apache.commons.*, !org.apache.http.*, !org.apache.tinkerpop.*, !org.controlsfx.*, !org.javatuples.*, !javax.*, !javafx.*, !org.kohsuke.args4j.*, !org.yaml.snakeyaml.*, *
+Import-Package: org.apache.commons.lang.*, org.apache.commons.io.*, !com.sun.*, !sun.*, !com.google.common.*, !eu.hansolo.*, !org.tukaani.xz.*, !org.brotli.dec.*, !com.github.luben.zstd.*, !org.apache.commons.*, !org.apache.http.*, !org.apache.tinkerpop.*, !org.controlsfx.*, !org.javatuples.*, !javax.*, !javafx.*, !org.kohsuke.args4j.*, !org.yaml.snakeyaml.*, *
         ]]></bnd>
                 </configuration>
             </plugin>
