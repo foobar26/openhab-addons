@@ -50,38 +50,64 @@ public class RadolanReader {
     }
 
     private void init() {
+        InputStream inputStream = null;
+        BZip2CompressorInputStream gzipIn = null;
+        ByteArrayOutputStream bout = null;
+        BufferedOutputStream bufout = null;
+        ByteArrayInputStream bin = null;
+        TarArchiveInputStream tarIn = null;
         try {
-            InputStream inputStream = new URL(RADOLAN_FX_PRODUCT_URL).openStream();
-            BZip2CompressorInputStream gzipIn = new BZip2CompressorInputStream(inputStream);
+            inputStream = new URL(RADOLAN_FX_PRODUCT_URL).openStream();
+            gzipIn = new BZip2CompressorInputStream(inputStream);
             int BUFFER_SIZE = 5000;
             byte[] buffer = new byte[BUFFER_SIZE];
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            BufferedOutputStream bufout = new BufferedOutputStream(bout, BUFFER_SIZE);
-            ByteArrayInputStream bin = null;
-            try (TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
-                TarArchiveEntry entry;
-                while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
-                    String[] parts = StringUtils.split(entry.getName(), "_");
-                    int filePrediction = Integer.parseInt(parts[1]);
-                    if (filePrediction == predictionTime) {
-                        int count = 0;
-                        while ((count = tarIn.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                            bufout.write(buffer, 0, count);
-                        }
-                        bufout.close();
-                        bin = new ByteArrayInputStream(bout.toByteArray());
-                        break;
+            bout = new ByteArrayOutputStream();
+            bufout = new BufferedOutputStream(bout, BUFFER_SIZE);
+            bin = null;
+            tarIn = new TarArchiveInputStream(gzipIn);
+            TarArchiveEntry entry;
+            while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+                String[] parts = StringUtils.split(entry.getName(), "_");
+                int filePrediction = Integer.parseInt(parts[1]);
+                if (filePrediction == predictionTime) {
+                    int count = 0;
+                    while ((count = tarIn.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                        bufout.write(buffer, 0, count);
                     }
+                    bufout.close();
+                    bin = new ByteArrayInputStream(bout.toByteArray());
+                    break;
                 }
             }
-            inputStream.close();
             compositeFX = new Composite(bin);
-            bin.close();
-            gzipIn.close();
-
             compositeWX = new Composite(RADOLAN_WX_PRODUCT_URL);
         } catch (Throwable throwable) {
             logger.error("Error getting rain data from DWD!", throwable);
+        } finally {
+            if (tarIn != null)
+                try { tarIn.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
+            if (bin != null)
+                try { bin.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
+            if (bufout != null)
+                try { bufout.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
+            if (bout != null)
+                try { bout.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
+            if (gzipIn != null)
+                try { gzipIn.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
+            if (inputStream != null)
+                try { inputStream.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
         }
     }
 

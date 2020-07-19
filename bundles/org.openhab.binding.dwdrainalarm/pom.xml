@@ -24,8 +24,9 @@
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
                 <configuration>
+                    <!-- Exclude apache-commons-compress third party libs -->
                     <bnd><![CDATA[
-Import-Package: org.apache.commons.lang.*, org.apache.commons.io.*, !com.sun.*, !sun.*, !com.google.common.*, !eu.hansolo.*, !org.tukaani.xz.*, !org.brotli.dec.*, !com.github.luben.zstd.*, !org.apache.commons.*, !org.apache.http.*, !org.apache.tinkerpop.*, !org.controlsfx.*, !org.javatuples.*, !javax.*, !javafx.*, !org.kohsuke.args4j.*, !org.yaml.snakeyaml.*, *
+Import-Package: !com.github.luben.zstd.*, !org.brotli.dec.*, !org.tukaani.xz.*, *
         ]]></bnd>
                 </configuration>
             </plugin>
@@ -55,97 +56,22 @@ Import-Package: org.apache.commons.lang.*, org.apache.commons.io.*, !com.sun.*, 
 		<!-- parses the DWD RADOLAN / RADVOR radar composite format - Java port of https://gitlab.cs.fau.de/since/radolan http://www.bitplan.com/Radolan -->
 		<dependency>
 			<groupId>com.bitplan.radolan</groupId>
-			<artifactId>com.bitplan.radolan</artifactId>
-			<version>0.0.3</version>
+			<artifactId>parser</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 
         <dependency>
-            <groupId>com.bitplan.gui</groupId>
-            <artifactId>com.bitplan.gui</artifactId>
-            <version>0.0.15</version>
+            <groupId>com.rgi-corp</groupId>
+            <artifactId>ww-geo-coords</artifactId>
+            <version>1.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.bitplan.gui</groupId>
-            <artifactId>com.bitplan.javafx</artifactId>
-            <version>0.0.33</version>
-        </dependency>
-
-        <!-- https://gis.stackexchange.com/questions/130913/geojson-java-library
-            https://github.com/filosganga/geogson -->
-        <dependency>
-            <groupId>com.github.filosganga</groupId>
-            <artifactId>geogson-core</artifactId>
-            <version>1.2.21</version>
-        </dependency>
-
-<!--        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-        </dependency> -->
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>gremlin-core</artifactId>
-            <version>${tinkerpop.version}</version>
-        </dependency>
-        <!-- in memory graph database -->
-        <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>tinkergraph-gremlin</artifactId>
-            <version>${tinkerpop.version}</version>
-        </dependency>
-        <!-- TestI18n dependency -->
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.6</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jcabi</groupId>
-            <artifactId>jcabi-manifests</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jcabi</groupId>
-            <artifactId>jcabi-log</artifactId>
-            <version>0.18.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup</groupId>
-            <artifactId>javapoet</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/net.objecthunter/exp4j -->
-        <dependency>
-            <groupId>net.objecthunter</groupId>
-            <artifactId>exp4j</artifactId>
-            <version>0.4.8</version>
-        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.7</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>

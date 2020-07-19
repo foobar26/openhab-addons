@@ -30,7 +30,7 @@ public class RadolanReaderTest {
 
     @Test
     public void testPredictionValue() {
-        Float value = radolanReader.getMaxRainWithinRadius(10);
+        Float value = radolanReader.getPrediction();
         System.out.println("Value: " + value);
         assertNotNull("Rain value should not be null!", value);
     }
