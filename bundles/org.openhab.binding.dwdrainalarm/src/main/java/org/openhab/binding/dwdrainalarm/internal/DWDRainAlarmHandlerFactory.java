@@ -19,8 +19,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
-import org.eclipse.smarthome.core.scheduler.CronScheduler;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
@@ -28,7 +26,6 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * The {@link DWDRainAlarmHandlerFactory} is responsible for creating things and thing
@@ -41,14 +38,9 @@ import org.osgi.service.component.annotations.Reference;
 public class DWDRainAlarmHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_RAINALARM);
-    private final CronScheduler scheduler;
-    private final TimeZoneProvider timeZoneProvider;
 
     @Activate
-    public DWDRainAlarmHandlerFactory(final @Reference CronScheduler scheduler,
-                                      final @Reference TimeZoneProvider timeZoneProvider) {
-        this.scheduler = scheduler;
-        this.timeZoneProvider = timeZoneProvider;
+    public DWDRainAlarmHandlerFactory() {
     }
 
     @Override
@@ -62,7 +54,7 @@ public class DWDRainAlarmHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_RAINALARM.equals(thingTypeUID)) {
-            return new DWDRainAlarmHandler(thing, scheduler, timeZoneProvider);
+            return new DWDRainAlarmHandler(thing);
         }
 
         return null;

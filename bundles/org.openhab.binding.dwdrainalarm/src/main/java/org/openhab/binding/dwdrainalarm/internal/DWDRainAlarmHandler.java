@@ -19,10 +19,8 @@ import static org.openhab.binding.dwdrainalarm.internal.DWDRainAlarmBindingConst
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.scheduler.CronScheduler;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -56,19 +54,12 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
 
     private boolean inRefresh = false;
 
-    /** Scheduler to schedule jobs */
-    private final CronScheduler cronScheduler;
-
-    private final TimeZoneProvider timeZoneProvider;
-
     private @Nullable ScheduledFuture<?> refreshJob;
 
     private RadolanReader radolanReader = new RadolanReader();
 
-    public DWDRainAlarmHandler(Thing thing, final CronScheduler scheduler, final TimeZoneProvider timeZoneProvider) {
+    public DWDRainAlarmHandler(Thing thing) {
         super(thing);
-        this.cronScheduler = scheduler;
-        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Override
@@ -91,29 +82,35 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
         logger.debug("Start initializing rain radar!");
         String thingUid = getThing().getUID().toString();
         config = getConfigAs(DWDRainAlarmConfiguration.class);
-        config.setThingUid(thingUid);
         boolean validConfig = true;
-
-        if (StringUtils.trimToNull(config.geolocation) == null) {
-            logger.error("DWDRainAlarm parameter geolocation is mandatory and must be configured, disabling thing '{}'",
+        if (config == null) {
+            logger.error("Couldn't read config, disabling thing '{}'",
                     thingUid);
             validConfig = false;
         } else {
-            config.parseGeoLocation();
-        }
-        if (config.latitude == null || config.longitude == null) {
-            logger.error(
-                    "DWDRainAlarm parameters geolocation could not be split into latitude and longitude, disabling thing '{}'",
-                    thingUid);
-            validConfig = false;
-        }
-        if (config.interval < 1 || config.interval > 86400) {
-            logger.error("DWDRainAlarm parameter interval must be in the range of 1-86400, disabling thing '{}'", thingUid);
-            validConfig = false;
-        }
-        if (config.predictionTime < 5 || config.predictionTime > 120) {
-            logger.error("DWDRainAlarm parameter interval must be in the range of 5-120 (in 5 min steps), disabling thing '{}'", thingUid);
-            validConfig = false;
+            config.setThingUid(thingUid);
+
+            if (StringUtils.trimToNull(config.geolocation) == null) {
+                logger.error("DWDRainAlarm parameter geolocation is mandatory and must be configured, disabling thing '{}'",
+                        thingUid);
+                validConfig = false;
+            } else {
+                config.parseGeoLocation();
+            }
+            if (config.latitude == null || config.longitude == null) {
+                logger.error(
+                        "DWDRainAlarm parameters geolocation could not be split into latitude and longitude, disabling thing '{}'",
+                        thingUid);
+                validConfig = false;
+            }
+            if (config.interval < 1 || config.interval > 86400) {
+                logger.error("DWDRainAlarm parameter interval must be in the range of 1-86400, disabling thing '{}'", thingUid);
+                validConfig = false;
+            }
+            if (config.predictionTime < 5 || config.predictionTime > 120) {
+                logger.error("DWDRainAlarm parameter interval must be in the range of 5-120 (in 5 min steps), disabling thing '{}'", thingUid);
+                validConfig = false;
+            }
         }
 
         if (validConfig) {
