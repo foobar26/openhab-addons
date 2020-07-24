@@ -41,7 +41,7 @@ demo.things:
 
 ```
 // Berlin
-dwdrainalarm:rainalarm:home [ geolocation="52.520008,13.404954", interval="300", radius="10" prediction-time="10"]
+dwdrainalarm:rainalarm:home [ geolocation="52.520008,13.404954", interval="300", radius="10", prediction-time="10"]
 ```
 
 demo.items:
