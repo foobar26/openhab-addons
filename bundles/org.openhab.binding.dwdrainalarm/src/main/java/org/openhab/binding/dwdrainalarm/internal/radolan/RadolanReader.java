@@ -4,10 +4,7 @@ import com.bitplan.geo.DPoint;
 import com.bitplan.geo.IPoint;
 import cs.fau.de.since.radolan.Composite;
 import cs.fau.de.since.radolan.Translate;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,17 +13,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.MessageFormat;
 
 public class RadolanReader {
     private final Logger logger = LoggerFactory.getLogger(RadolanReader.class);
     private final String RADOLAN_WX_PRODUCT_URL = "https://opendata.dwd.de/weather/radar/composit/wx/raa01-wx_10000-latest-dwd---bin";
-    private final String RADOLAN_FX_PRODUCT_URL = "https://opendata.dwd.de/weather/radar/composit/fx/FX_LATEST.tar.bz2";
+    private final String RADOLAN_WN_PRODUCT_URL = "https://opendata.dwd.de/weather/radar/composit/wn/WN_LATEST_0{0}.bz2";
 
     private double latitude;
     private double longitude;
     private int predictionTime = 10;
     private Composite compositeWX;
-    private Composite compositeFX;
+    private Composite compositeWN;
 
     public RadolanReader() {
         init();
@@ -55,39 +53,24 @@ public class RadolanReader {
         ByteArrayOutputStream bout = null;
         BufferedOutputStream bufout = null;
         ByteArrayInputStream bin = null;
-        TarArchiveInputStream tarIn = null;
         try {
-            inputStream = new URL(RADOLAN_FX_PRODUCT_URL).openStream();
+            inputStream = new URL(MessageFormat.format(RADOLAN_WN_PRODUCT_URL, predictionTime)).openStream();
             gzipIn = new BZip2CompressorInputStream(inputStream);
             int BUFFER_SIZE = 5000;
             byte[] buffer = new byte[BUFFER_SIZE];
             bout = new ByteArrayOutputStream();
             bufout = new BufferedOutputStream(bout, BUFFER_SIZE);
-            bin = null;
-            tarIn = new TarArchiveInputStream(gzipIn);
-            TarArchiveEntry entry;
-            while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
-                String[] parts = StringUtils.split(entry.getName(), "_");
-                int filePrediction = Integer.parseInt(parts[1]);
-                if (filePrediction == predictionTime) {
-                    int count = 0;
-                    while ((count = tarIn.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                        bufout.write(buffer, 0, count);
-                    }
-                    bufout.close();
-                    bin = new ByteArrayInputStream(bout.toByteArray());
-                    break;
-                }
+            int count = 0;
+            while ((count = gzipIn.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                bufout.write(buffer, 0, count);
             }
-            compositeFX = new Composite(bin);
-            compositeWX = new Composite(RADOLAN_WX_PRODUCT_URL);
+            bufout.close();
+            bout.close();
+            bin = new ByteArrayInputStream(bout.toByteArray());
+            compositeWN = new Composite(bin);
         } catch (Throwable throwable) {
             logger.error("Error getting rain data from DWD!", throwable);
         } finally {
-            if (tarIn != null)
-                try { tarIn.close(); } catch (Exception e) {
-                    logger.debug("Error closing stream", e);
-                }
             if (bin != null)
                 try { bin.close(); } catch (Exception e) {
                     logger.debug("Error closing stream", e);
@@ -109,6 +92,11 @@ public class RadolanReader {
                     logger.debug("Error closing stream", e);
                 }
         }
+        try {
+            compositeWX = new Composite(RADOLAN_WX_PRODUCT_URL);
+        } catch (Throwable throwable) {
+            logger.error("Error getting rain data from DWD!", throwable);
+        }
     }
 
     public void refresh() {
@@ -123,7 +111,7 @@ public class RadolanReader {
 
     public Float getPrediction() {
         DPoint location = new DPoint(this.latitude, this.longitude);
-        float valueNew = this.getValueAtCoord(compositeFX, location);
+        float valueNew = this.getValueAtCoord(compositeWN, location);
         return valueNew;
     }
 

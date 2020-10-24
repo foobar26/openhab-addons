@@ -152,42 +152,49 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
     }
 
     private void updateData() {
-        if (inRefresh) {
-            logger.trace("Already refreshing. Ignoring refresh request.");
-            return;
+        try {
+            if (inRefresh) {
+                logger.trace("Already refreshing. Ignoring refresh request.");
+                return;
+            }
+
+            ThingStatus status = getThing().getStatus();
+            if (status != ThingStatus.ONLINE && status != ThingStatus.UNKNOWN) {
+                logger.debug("Unable to refresh. Thing status is {}", status);
+                return;
+            }
+
+            inRefresh = true;
+
+            if (radolanReader.getLatitude() == 0) {
+                radolanReader = new RadolanReader();
+                radolanReader.setPredictionTime(config.predictionTime);
+                Double latitude = config.latitude;
+                Double longitude = config.longitude;
+                radolanReader.setPosition(latitude, longitude);
+            } else {
+                radolanReader.refresh();
+            }
+            Float currentValue = radolanReader.getCurrent();
+            Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(config.radius);
+            Float predictionValue = radolanReader.getPrediction();
+
+            if (status == ThingStatus.UNKNOWN) {
+                updateStatus(ThingStatus.ONLINE);
+            }
+
+            logger.debug("Current value: " + currentValue);
+            updateState(getChannelUuid(EVENT_CHANNEL_ID_CURRENT), new DecimalType(currentValue));
+            logger.debug("Max value: " + maxValueWithinRadius);
+            updateState(getChannelUuid(EVENT_CHANNEL_ID_MAXINRADIUS), new DecimalType(maxValueWithinRadius));
+            logger.debug("Prediction value: " + predictionValue);
+            updateState(getChannelUuid(EVENT_CHANNEL_ID_PREDICTION), new DecimalType(predictionValue));
+
+            inRefresh = false;
+            logger.debug("Rain radar updated.");
+        } catch (Exception e) {
+            logger.error("Updating rain radar failed!", e);
         }
-
-        ThingStatus status = getThing().getStatus();
-        if (status != ThingStatus.ONLINE && status != ThingStatus.UNKNOWN) {
-            logger.debug("Unable to refresh. Thing status is {}", status);
-            return;
-        }
-
-        inRefresh = true;
-
-        if (radolanReader.getLatitude() == 0) {
-            radolanReader = new RadolanReader();
-            radolanReader.setPredictionTime(config.predictionTime);
-            Double latitude = config.latitude;
-            Double longitude = config.longitude;
-            radolanReader.setPosition(latitude, longitude);
-        } else {
-            radolanReader.refresh();
-        }
-        Float currentValue = radolanReader.getCurrent();
-        Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(config.radius);
-        Float predictionValue = radolanReader.getPrediction();
-
-        if (status == ThingStatus.UNKNOWN) {
-            updateStatus(ThingStatus.ONLINE);
-        }
-
-        updateState(getChannelUuid(EVENT_CHANNEL_ID_CURRENT), new DecimalType(currentValue));
-        updateState(getChannelUuid(EVENT_CHANNEL_ID_MAXINRADIUS), new DecimalType(maxValueWithinRadius));
-        updateState(getChannelUuid(EVENT_CHANNEL_ID_PREDICTION), new DecimalType(predictionValue));
-
-        inRefresh = false;
-        logger.debug("Rain radar updated.");
     }
 
     private ChannelUID getChannelUuid(String typeId) {
