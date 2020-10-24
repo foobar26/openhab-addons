@@ -48,6 +48,6 @@ demo.items:
 
 ```
 Number current_rain_radar "Current Rain Radar" { channel="dwdrainalarm:rainalarm:home:current" }
-Number max_rain_radar "Max Rain Radar" { channel="dwdrainalarm:rainalarm:home:maxInRadius" }
+Number max_rain_radar "Max Rain Radar in Radius" { channel="dwdrainalarm:rainalarm:home:maxInRadius" }
 Number prediction_radar "Prediction Rain Radar" { channel="dwdrainalarm:rainalarm:home:prediction" }
 ```
