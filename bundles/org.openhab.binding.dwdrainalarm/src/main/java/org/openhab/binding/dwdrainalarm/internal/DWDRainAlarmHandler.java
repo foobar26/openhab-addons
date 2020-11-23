@@ -190,11 +190,11 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             logger.debug("Prediction value: " + predictionValue);
             updateState(getChannelUuid(EVENT_CHANNEL_ID_PREDICTION), new DecimalType(predictionValue));
 
-            inRefresh = false;
             logger.debug("Rain radar updated.");
         } catch (Exception e) {
             logger.error("Updating rain radar failed!", e);
         }
+        inRefresh = false;
     }
 
     private ChannelUID getChannelUuid(String typeId) {
