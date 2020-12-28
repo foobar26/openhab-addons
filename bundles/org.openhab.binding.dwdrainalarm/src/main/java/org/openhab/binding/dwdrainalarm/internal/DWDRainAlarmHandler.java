@@ -72,9 +72,13 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
     }
 
     private void updateThings() {
-        logger.trace("Updating rain radar!");
+        try {
+            logger.trace("Updating rain radar!");
 
-        this.updateData();
+            this.updateData();
+        } catch (Throwable t) {
+            logger.error("Error in rain alarm handler", t);
+        }
     }
 
     @Override
@@ -144,7 +148,7 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
         logger.debug("Dispose DWDRainAlarm handler '{}'.", getThing().getUID());
         ScheduledFuture<?> localRefreshJob = refreshJob;
         if (localRefreshJob != null && !localRefreshJob.isCancelled()) {
-            logger.debug("Stop refresh job.");
+            logger.info("Stop refresh job.");
             if (localRefreshJob.cancel(true)) {
                 refreshJob = null;
             }
@@ -165,6 +169,7 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             }
 
             inRefresh = true;
+            updateStatus(ThingStatus.UNKNOWN);
 
             if (radolanReader.getLatitude() == 0) {
                 radolanReader = new RadolanReader();
@@ -173,15 +178,14 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
                 Double longitude = config.longitude;
                 radolanReader.setPosition(latitude, longitude);
             } else {
+                logger.debug("Refreshing rain radar...");
                 radolanReader.refresh();
             }
             Float currentValue = radolanReader.getCurrent();
             Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(config.radius);
             Float predictionValue = radolanReader.getPrediction();
 
-            if (status == ThingStatus.UNKNOWN) {
-                updateStatus(ThingStatus.ONLINE);
-            }
+            updateStatus(ThingStatus.ONLINE);
 
             logger.debug("Current value: " + currentValue);
             updateState(getChannelUuid(EVENT_CHANNEL_ID_CURRENT), new DecimalType(currentValue));
@@ -191,7 +195,7 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             updateState(getChannelUuid(EVENT_CHANNEL_ID_PREDICTION), new DecimalType(predictionValue));
 
             logger.debug("Rain radar updated.");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.error("Updating rain radar failed!", e);
         }
         inRefresh = false;

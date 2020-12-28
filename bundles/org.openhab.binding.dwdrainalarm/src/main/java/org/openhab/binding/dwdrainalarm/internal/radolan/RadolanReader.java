@@ -5,6 +5,7 @@ import com.bitplan.geo.IPoint;
 import cs.fau.de.since.radolan.Composite;
 import cs.fau.de.since.radolan.Translate;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.MessageFormat;
 
 public class RadolanReader {
@@ -53,9 +55,16 @@ public class RadolanReader {
         ByteArrayOutputStream bout = null;
         BufferedOutputStream bufout = null;
         ByteArrayInputStream bin = null;
+        ByteArrayInputStream binInit = null;
         try {
-            inputStream = new URL(MessageFormat.format(RADOLAN_WN_PRODUCT_URL, predictionTime)).openStream();
-            gzipIn = new BZip2CompressorInputStream(inputStream);
+            URL url = new URL(MessageFormat.format(RADOLAN_WN_PRODUCT_URL, predictionTime));
+            URLConnection con = url.openConnection();
+            con.setConnectTimeout(15 * 1000);
+            con.setReadTimeout(15 * 1000);
+            inputStream = con.getInputStream();
+            byte[] lbytes = IOUtils.toByteArray(inputStream);
+            binInit = new ByteArrayInputStream(lbytes);
+            gzipIn = new BZip2CompressorInputStream(binInit);
             int BUFFER_SIZE = 5000;
             byte[] buffer = new byte[BUFFER_SIZE];
             bout = new ByteArrayOutputStream();
@@ -69,7 +78,7 @@ public class RadolanReader {
             bin = new ByteArrayInputStream(bout.toByteArray());
             compositeWN = new Composite(bin);
         } catch (Throwable throwable) {
-            logger.error("Error getting rain data from DWD!", throwable);
+            logger.error("Error getting rain data for WN from DWD!", throwable);
         } finally {
             if (bin != null)
                 try { bin.close(); } catch (Exception e) {
@@ -87,15 +96,32 @@ public class RadolanReader {
                 try { gzipIn.close(); } catch (Exception e) {
                     logger.debug("Error closing stream", e);
                 }
+            if (binInit != null) {
+                try { binInit.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
+            }
             if (inputStream != null)
                 try { inputStream.close(); } catch (Exception e) {
                     logger.debug("Error closing stream", e);
                 }
         }
+        InputStream inputStream2 = null;
         try {
-            compositeWX = new Composite(RADOLAN_WX_PRODUCT_URL);
+            URL url = new URL(RADOLAN_WX_PRODUCT_URL);
+            URLConnection con = url.openConnection();
+            con.setConnectTimeout(15 * 1000);
+            con.setReadTimeout(15 * 1000);
+            inputStream2 = con.getInputStream();
+
+            compositeWX = new Composite(inputStream2);
         } catch (Throwable throwable) {
-            logger.error("Error getting rain data from DWD!", throwable);
+            logger.error("Error getting rain data for WX from DWD!", throwable);
+        } finally {
+            if (inputStream2 != null)
+                try { inputStream2.close(); } catch (Exception e) {
+                    logger.debug("Error closing stream", e);
+                }
         }
     }
 
