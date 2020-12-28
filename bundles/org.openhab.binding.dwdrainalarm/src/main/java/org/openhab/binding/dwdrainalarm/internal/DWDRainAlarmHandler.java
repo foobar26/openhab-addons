@@ -169,7 +169,6 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             }
 
             inRefresh = true;
-            updateStatus(ThingStatus.UNKNOWN);
 
             if (radolanReader.getLatitude() == 0) {
                 radolanReader = new RadolanReader();
@@ -185,7 +184,10 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             Float maxValueWithinRadius = radolanReader.getMaxRainWithinRadius(config.radius);
             Float predictionValue = radolanReader.getPrediction();
 
-            updateStatus(ThingStatus.ONLINE);
+            if (getThing().getStatus() != ThingStatus.ONLINE) {
+                logger.info("Rainradar recovered.");
+                updateStatus(ThingStatus.ONLINE);
+            }
 
             logger.debug("Current value: " + currentValue);
             updateState(getChannelUuid(EVENT_CHANNEL_ID_CURRENT), new DecimalType(currentValue));
@@ -197,6 +199,9 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
             logger.debug("Rain radar updated.");
         } catch (Throwable e) {
             logger.error("Updating rain radar failed!", e);
+            try { updateStatus(ThingStatus.UNKNOWN); } catch (Throwable t) {
+                logger.debug("Cannot set thing status!", e);
+            }
         }
         inRefresh = false;
     }
