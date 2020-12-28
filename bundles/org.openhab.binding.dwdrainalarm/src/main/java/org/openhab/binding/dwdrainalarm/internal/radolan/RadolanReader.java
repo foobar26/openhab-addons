@@ -29,7 +29,9 @@ public class RadolanReader {
     private Composite compositeWN;
 
     public RadolanReader() {
-        init();
+        try { init(); } catch (RadolanRetrieveException e) {
+            logger.debug("Cannot initialize Radolan reader!", e);
+        }
     }
 
     public double getLatitude() {
@@ -49,7 +51,7 @@ public class RadolanReader {
         this.predictionTime = predictionTime;
     }
 
-    private void init() {
+    private void init() throws RadolanRetrieveException {
         InputStream inputStream = null;
         BZip2CompressorInputStream gzipIn = null;
         ByteArrayOutputStream bout = null;
@@ -78,7 +80,8 @@ public class RadolanReader {
             bin = new ByteArrayInputStream(bout.toByteArray());
             compositeWN = new Composite(bin);
         } catch (Throwable throwable) {
-            logger.error("Error getting rain data for WN from DWD!", throwable);
+            logger.debug("Error getting rain data for WN from DWD!", throwable);
+            throw new RadolanRetrieveException("Error updating Radolan information!", throwable);
         } finally {
             if (bin != null)
                 try { bin.close(); } catch (Exception e) {
@@ -116,7 +119,8 @@ public class RadolanReader {
 
             compositeWX = new Composite(inputStream2);
         } catch (Throwable throwable) {
-            logger.error("Error getting rain data for WX from DWD!", throwable);
+            logger.debug("Error getting rain data for WX from DWD!", throwable);
+            throw new RadolanRetrieveException("Error updating Radolan information!", throwable);
         } finally {
             if (inputStream2 != null)
                 try { inputStream2.close(); } catch (Exception e) {
@@ -125,7 +129,7 @@ public class RadolanReader {
         }
     }
 
-    public void refresh() {
+    public void refresh() throws RadolanRetrieveException {
         init();
     }
 
