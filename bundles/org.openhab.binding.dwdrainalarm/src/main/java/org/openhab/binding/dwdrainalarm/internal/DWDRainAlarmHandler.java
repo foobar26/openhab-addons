@@ -198,7 +198,8 @@ public class DWDRainAlarmHandler extends BaseThingHandler {
 
             logger.debug("Rain radar updated.");
         } catch (Throwable e) {
-            logger.error("Updating rain radar failed!", e);
+            logger.info("Updating rain radar failed: " + e.getMessage());
+            logger.debug("Debug info for failure", e);
             try { updateStatus(ThingStatus.UNKNOWN); } catch (Throwable t) {
                 logger.debug("Cannot set thing status!", e);
             }
