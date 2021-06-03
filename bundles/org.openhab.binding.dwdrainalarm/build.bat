@@ -1,1 +1,1 @@
-mvn clean install -Dspotless.check.skip=true -Dspotbugs.skip=true -Dfindbugs.skip=true -Dcheckstyle.skip=true -Dpmd.skip=true
+mvn clean install -Dohc.version=3.0.2 -Dspotless.check.skip=true -Dspotbugs.skip=true -Dfindbugs.skip=true -Dcheckstyle.skip=true -Dpmd.skip=true
