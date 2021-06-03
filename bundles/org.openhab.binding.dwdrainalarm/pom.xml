@@ -16,15 +16,15 @@
 
     <build>
         <plugins>
-            <plugin>
+            <!--            <plugin>
                             <groupId>biz.aQute.bnd</groupId>
                             <artifactId>bnd-maven-plugin</artifactId>
                             <configuration>
                                 <bnd><![CDATA[
-            Import-Package: !javax.*
+            Import-Package: !com.github.luben.zstd.*, !org.brotli.dec.*, !org.tukaani.xz.*, *
                     ]]></bnd>
                             </configuration>
-                        </plugin>
+                        </plugin> -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <configuration>
