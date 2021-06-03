@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="dwdrainalarm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="rainalarm">
+		<label>DWDRainAlarm Binding Thing</label>
+		<description>Provides rain forcasts for given location</description>
+
+		<channels>
+			<channel id="current" typeId="current"/>
+			<channel id="maxInRadius" typeId="maxInRadius"/>
+			<channel id="prediction" typeId="prediction" />
+		</channels>
+
+		<representation-property>geolocation</representation-property>
+
+		<config-description-ref uri="thing-type:dwdrainalarm:config"/>
+
+	</thing-type>
+
+	<channel-type id="current">
+		<item-type>Number:Length</item-type>
+		<label>Current radar value</label>
+		<description>Value for current radar value at location</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+	<channel-type id="maxInRadius">
+		<item-type>Number:Length</item-type>
+		<label>Max radar value in radius around location</label>
+		<description>Value for Max radar value within radius around location</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+	<channel-type id="prediction">
+		<item-type>Number:Length</item-type>
+		<label>Predicted radar value in radius at location</label>
+		<description>Value for predicted radar value at location</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+</thing:thing-descriptions>
